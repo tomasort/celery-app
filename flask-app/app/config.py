@@ -10,6 +10,11 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR}/db.sqlite3')
     SECRET_KEY = os.environ.get('SECRET_KEY', 'f64ac936a2d9b7370c6b55b727f92c18') # use secrets.token_hex(32) or something like that to generate a key
+    CELERY=dict(
+        broker_url=os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0"),
+        result_backend=os.environ.get("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0"),
+        task_ignore_result=True,
+    )
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""

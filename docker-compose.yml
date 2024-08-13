@@ -1,18 +1,38 @@
 version: "3.8"
 
+x-common-env: &common-env
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  CELERY_RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  CELERY_BROKER_URL: redis://redis:6379/
+  SECRET_KEY: ${SECRET_KEY}
+  FLASK_PORT: ${FLASK_PORT}
+  FLOWER_PORT: ${FLOWER_PORT}
+
+x-app-base: &app-base
+  build:
+    context: flask-app
+    dockerfile: docker/prod/Dockerfile
+  environment: *common-env
+  networks:
+    - messages
+    - database
+    - proxy-server
+  depends_on:
+    - redis
+
 services:
-  flask:
-    build: .
-    environment:
-      - FLASK_APP=application
-      - FLASK_DEBUG=1
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    ports:
-      - 5000:5000
-    volumes:
-      - ./app:/src/app
+  web:
+    <<: *app-base
+    command: /start.sh
+
+  celery-worker:
+    <<: *app-base
+    command: /worker.sh
+
+  redis:
+    image: redis:alpine3.20
     networks:
-      - database
+      - messages
 
   postgres:
     image: postgres:14-alpine
@@ -23,6 +43,22 @@ services:
     networks:
       - database
 
+  nginx:
+    build: nginx
+    environment:
+      - FLASK_PORT=${FLASK_PORT}
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+    networks:
+      - proxy-server
+    ports:
+      - 80:80
+    depends_on:
+      - web
+
 networks:
   database:
+    driver: bridge
+  messages:
+    driver: bridge
+  proxy-server:
     driver: bridge

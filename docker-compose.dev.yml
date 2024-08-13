@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./flask-app
+      dockerfile: ./docker/local/Dockerfile
+    command: /start.sh
+    environment:
+      - FLASK_APP=application
+      - FLASK_DEBUG=1
+    ports:
+      - ${FLASK_PORT}:${FLASK_PORT}
+    volumes:
+      - ./flask-app:/src
