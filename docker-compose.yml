@@ -2,16 +2,18 @@ version: "3.8"
 
 x-common-env: &common-env
   DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-  CELERY_RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-  CELERY_BROKER_URL: redis://redis:6379/
+  RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  BROKER_URL: redis://redis:6379/
+  # BROKER_URL: amqp://${RABBIT_USERNAME}:${RABBIT_USER_PASSWORD}@rabbit:5672/
   SECRET_KEY: ${SECRET_KEY}
   FLASK_PORT: ${FLASK_PORT}
   FLOWER_PORT: ${FLOWER_PORT}
+  FLASK_CONFIG: production
 
 x-app-base: &app-base
   build:
     context: flask-app
-    dockerfile: docker/prod/Dockerfile
+    dockerfile: docker/Dockerfile
   environment: *common-env
   networks:
     - messages
@@ -36,6 +38,8 @@ services:
 
   postgres:
     image: postgres:14-alpine
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -54,6 +58,14 @@ services:
       - 80:80
     depends_on:
       - web
+  # rabbit:
+  #   build: ./rabbitmq
+  #   environment:
+  #     - RABBIT_USERNAME=${RABBIT_USERNAME}
+  #     - RABBIT_USER_PASSWORD=${RABBIT_USER_PASSWORD}
+  #   networks:
+  #     - messages
+  #     - database
 
 networks:
   database:
@@ -62,3 +74,6 @@ networks:
     driver: bridge
   proxy-server:
     driver: bridge
+
+volumes:
+  postgres-data:

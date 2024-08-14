@@ -2,8 +2,8 @@ from flask import current_app, render_template, request
 from flask_login import login_required
 from celery.result import AsyncResult
 from app.main import main
-from app.main.tasks import add_together
-from app import db
+from app.main.tasks import add_together, test_task
+from app import db, socketio
 
 @main.route('/')
 def index():
@@ -11,12 +11,21 @@ def index():
 
 @main.route('/secret')
 @login_required
-def secret():
-    return render_template('secret.html')
+def secrets():
+    return render_template('secrets.html')
 
-@main.route('/test')
-def test():
-    return render_template('test.html')
+@main.route('/simple-task')
+def simple_task():
+    return render_template('test-task.html')
+
+@main.route('/tasks')
+def tasks():
+    return render_template('tasks.html')
+
+@main.route('/start-task')
+def start_task():
+    result = test_task.delay()
+    return {"status": "Task started", "task_id": result.id}
 
 @main.post("/add")
 def start_add() -> dict[str, object]:

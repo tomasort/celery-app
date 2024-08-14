@@ -23,3 +23,6 @@ celery==5.4.0
 redis
 pyuwsgi
 flask_socketio
+watchdog
+eventlet
+kombu

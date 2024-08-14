@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Test the Flask Celery Task</h1>
+
+<!-- Form to start the add task -->
+<form id="addForm" method="post" action="/add">
+    <label for="a">Enter first number (a):</label>
+    <input type="number" id="a" name="a" required>
+    <br><br>
+    <label for="b">Enter second number (b):</label>
+    <input type="number" id="b" name="b" required>
+    <br><br>
+    <button type="submit">Start Task</button>
+</form>
+
+<div id="resultSection" style="display: none;">
+    <h2>Task Submitted</h2>
+    <p>Check the result by clicking the link below:</p>
+    <a id="resultLink" href="#">Check Result</a>
+</div>
+
+<script>
+    const addForm = document.getElementById("addForm");
+    const resultSection = document.getElementById("resultSection");
+    const resultLink = document.getElementById("resultLink");
+
+    addForm.addEventListener("submit", async function(event) {
+        event.preventDefault(); // Prevent form from submitting the traditional way
+
+        // Get form data
+        const formData = new FormData(addForm);
+        const formParams = new URLSearchParams(formData);
+
+        // Send form data to /add using fetch
+        const response = await fetch(addForm.action, {
+            method: addForm.method,
+            body: formParams,
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const resultId = data.result_id;
+
+            // Show the result section with a link to check the result
+            resultSection.style.display = "block";
+            resultLink.href = `/result/${resultId}`;
+            resultLink.textContent = `Check Result (Task ID: ${resultId})`;
+        } else {
+            alert("Something went wrong. Please try again.");
+        }
+    });
+</script>
+
+{% endblock %}%     

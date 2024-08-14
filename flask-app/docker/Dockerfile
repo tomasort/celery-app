@@ -1,6 +1,8 @@
-FROM python:3.9-alpine3.19
+FROM python:3.12.3-alpine3.20
 
 WORKDIR /src
+
+RUN apk add --no-cache build-base
 
 RUN pip install --upgrade pip
 
@@ -11,7 +13,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY . .
 
-COPY docker/prod/start.sh /start.sh
+COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
 COPY docker/worker.sh /worker.sh
@@ -23,4 +25,4 @@ RUN chmod +x /flower.sh
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT [ "/entrypoint.sh" ]

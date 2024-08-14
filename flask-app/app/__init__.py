@@ -1,14 +1,17 @@
+import eventlet
+eventlet.monkey_patch(all=False, socket=True)
+# from gevent import monkey
+# monkey.patch_all()
 import os
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from logging.handlers import RotatingFileHandler
-from celery import Celery, Task
 from app.config import config
 import logging
 from flask_login import LoginManager
 from flask_socketio import SocketIO
-
+from celery import Celery, Task
 
 # instantiate the extensions
 db = SQLAlchemy()
@@ -30,7 +33,7 @@ def create_app(config_name=None) -> Flask:
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    socketio.init_app(app)
+    socketio.init_app(app, message_queue=os.environ.get("BROKER_URL", 'redis://localhost:6379/0'))
 
     # set up Celery
     celery_init_app(app)
@@ -62,7 +65,6 @@ def setup_logging(app) -> None:
     app.logger.addHandler(file_handler)
 
     app.logger.info('app startup')
-
 
 def celery_init_app(app: Flask) -> Celery:
     class FlaskTask(Task):
