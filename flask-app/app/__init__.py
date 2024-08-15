@@ -1,7 +1,5 @@
 import eventlet
 eventlet.monkey_patch(all=False, socket=True)
-# from gevent import monkey
-# monkey.patch_all()
 import os
 from flask import Flask, render_template
 from flask_migrate import Migrate
@@ -55,9 +53,9 @@ def create_app(config_name=None) -> Flask:
     return app
 
 def setup_logging(app) -> None:
-    if not os.path.exists(f'{__name__}/logs'):  
-        os.mkdir(f'{__name__}/logs')
-    file_handler = RotatingFileHandler(f'{__name__}/logs/{__name__}.log', maxBytes=10240, backupCount=10)
+    if not os.path.exists(f'./logs'):  
+        os.mkdir(f'./logs')
+    file_handler = RotatingFileHandler(f'./logs/{__name__}.log', maxBytes=10240, backupCount=10)
     file_handler.setFormatter(logging.Formatter(
         '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
     ))

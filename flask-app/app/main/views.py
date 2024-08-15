@@ -22,9 +22,9 @@ def simple_task():
 def tasks():
     return render_template('tasks.html')
 
-@main.route('/start-task')
+@socketio.on('start-task')
 def start_task():
-    result = test_task.delay()
+    result = test_task.delay(request.sid)
     return {"status": "Task started", "task_id": result.id}
 
 @main.post("/add")
