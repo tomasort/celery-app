@@ -1,4 +1,4 @@
-FROM nginx:alpine
+FROM nginx:stable-alpine3.19 
 
 # For sponge
 RUN apk add --no-cache moreutils 

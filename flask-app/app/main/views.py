@@ -14,18 +14,18 @@ def index():
 def secrets():
     return render_template('secrets.html')
 
-@main.route('/simple-task')
-def simple_task():
-    return render_template('test-task.html')
-
-@main.route('/tasks')
+@main.route('/progressbar')
 def tasks():
-    return render_template('tasks.html')
+    return render_template('progressbar.html')
 
 @socketio.on('start-task')
-def start_task():
-    result = test_task.delay(request.sid)
+def start_task(data):
+    result = test_task.delay(request.sid, int(data['length']))
     return {"status": "Task started", "task_id": result.id}
+
+@main.route('/addition')
+def simple_task():
+    return render_template('addition.html')
 
 @main.post("/add")
 def start_add() -> dict[str, object]:
